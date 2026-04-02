@@ -41,7 +41,7 @@ export function DashboardView() {
   const insightText = buildInsightText(topRoute, viewState.depotStockLevelPercent, viewState.pendingExpensesAmount);
 
   return (
-    <AppShell sidebar={<DashboardSidebar activeKey="dashboard" />}>
+    <AppShell sidebar={<DashboardSidebar activeKey="dashboard" />} contentClassName="space-y-4 sm:space-y-5 lg:space-y-6">
       <DashboardHeader
         filters={filters}
         refreshing={viewState.refreshing}
@@ -55,9 +55,9 @@ export function DashboardView() {
         <Alert variant="destructive">Your account is inactive. Please contact an administrator.</Alert>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
         {viewState.loading ? (
-          Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-52 rounded-lg" />)
+          Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-40 rounded-2xl sm:h-48" />)
         ) : (
           <>
             <KpiCard
@@ -104,10 +104,10 @@ export function DashboardView() {
 
       <SummaryWidgets bundle={viewState.bundle} loading={viewState.loading} />
 
-      <section className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <section className="grid gap-4 xl:grid-cols-[1.7fr_1fr] xl:gap-6">
         <RecentActivity items={viewState.activities} loading={viewState.loading} />
 
-        <div className="space-y-6">
+        <div className="space-y-4 xl:space-y-6">
           <RouteSaturationWidget items={viewState.bundle?.routePerformance ?? []} loading={viewState.loading} />
           <AiInsightCard content={insightText} canGenerate={viewState.canGenerateInsightReport} />
         </div>

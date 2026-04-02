@@ -36,7 +36,7 @@ export function RecentActivity({ items, loading }: RecentActivityProps) {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-16 animate-pulse rounded-md bg-slate-200" />
+              <div key={index} className="h-20 animate-pulse rounded-xl bg-slate-200" />
             ))}
           </div>
         ) : items.length === 0 ? (
@@ -44,40 +44,68 @@ export function RecentActivity({ items, loading }: RecentActivityProps) {
             No analytics activity available for the selected date range.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-[0.15em] text-slate-500">
-                <tr>
-                  <th className="pb-3">Route/Depot</th>
-                  <th className="pb-3">Activity</th>
-                  <th className="pb-3">Value</th>
-                  <th className="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {items.map((item) => {
-                  const ToneIcon = toneIcon(item.statusTone);
+          <>
+            <div className="space-y-3 md:hidden">
+              {items.map((item) => {
+                const ToneIcon = toneIcon(item.statusTone);
 
-                  return (
-                    <tr key={item.id} className="align-top">
-                      <td className="py-3 pr-3">
+                return (
+                  <article key={item.id} className="space-y-3 rounded-xl border border-slate-100 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
                         <p className="font-semibold text-slate-900">{item.routeOrDepot}</p>
-                        {item.meta ? <p className="text-xs text-slate-500">{item.meta}</p> : null}
-                      </td>
-                      <td className="py-3 pr-3 text-slate-700">{item.activity}</td>
-                      <td className="py-3 pr-3 font-semibold text-slate-900">{item.value}</td>
-                      <td className="py-3">
-                        <Badge variant={toneToBadgeVariant(item.statusTone)} className="inline-flex gap-1">
-                          <ToneIcon className="h-3.5 w-3.5" />
-                          {item.statusLabel}
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {item.meta ? <p className="mt-1 text-xs text-slate-500">{item.meta}</p> : null}
+                      </div>
+                      <Badge variant={toneToBadgeVariant(item.statusTone)} className="shrink-0 inline-flex gap-1">
+                        <ToneIcon className="h-3.5 w-3.5" />
+                        {item.statusLabel}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-700">{item.activity}</p>
+                      <p className="text-lg font-semibold text-slate-900">{item.value}</p>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
+              <table className="min-w-full text-sm">
+                <thead className="text-left text-xs uppercase tracking-[0.15em] text-slate-500">
+                  <tr>
+                    <th className="pb-3">Route/Depot</th>
+                    <th className="pb-3">Activity</th>
+                    <th className="pb-3">Value</th>
+                    <th className="pb-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {items.map((item) => {
+                    const ToneIcon = toneIcon(item.statusTone);
+
+                    return (
+                      <tr key={item.id} className="align-top">
+                        <td className="py-3 pr-3">
+                          <p className="font-semibold text-slate-900">{item.routeOrDepot}</p>
+                          {item.meta ? <p className="text-xs text-slate-500">{item.meta}</p> : null}
+                        </td>
+                        <td className="py-3 pr-3 text-slate-700">{item.activity}</td>
+                        <td className="py-3 pr-3 font-semibold text-slate-900">{item.value}</td>
+                        <td className="py-3">
+                          <Badge variant={toneToBadgeVariant(item.statusTone)} className="inline-flex gap-1">
+                            <ToneIcon className="h-3.5 w-3.5" />
+                            {item.statusLabel}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
@@ -93,7 +121,7 @@ export function AiInsightCard({ content, canGenerate }: { content: string; canGe
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 text-sm text-blue-100">
-        <p>{content}</p>
+        <p className="leading-6">{content}</p>
         <button
           type="button"
           disabled={!canGenerate}

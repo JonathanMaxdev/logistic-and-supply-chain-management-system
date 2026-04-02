@@ -30,19 +30,20 @@ export function SummaryWidgets({ bundle, loading }: SummaryWidgetsProps) {
         </CardHeader>
         <CardContent className="space-y-3 pt-0">
           {loading ? (
-            Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-14" />)
+            Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-16 rounded-xl" />)
           ) : topProducts.length === 0 ? (
-            <p className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+            <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
               No product movement data available.
             </p>
           ) : (
-            topProducts.map((item) => (
-              <div key={item.productId} className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2.5">
-                <div>
-                  <p className="font-semibold text-slate-900">{item.productName}</p>
+            topProducts.map((item, index) => (
+              <div key={item.productId} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 px-3 py-3 sm:px-4">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">#{index + 1} Product</p>
+                  <p className="mt-1 truncate font-semibold text-slate-900">{item.productName}</p>
                   <p className="text-xs text-slate-500">{item.productCode}</p>
                 </div>
-                <p className="font-semibold text-slate-800">{item.totalSalesQty} units</p>
+                <p className="shrink-0 text-right font-semibold text-slate-800">{item.totalSalesQty} units</p>
               </div>
             ))
           )}
@@ -54,26 +55,26 @@ export function SummaryWidgets({ bundle, loading }: SummaryWidgetsProps) {
           <CardTitle>Payment Mode Totals</CardTitle>
           <CardDescription>Cash, cheques, and credit split</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 pt-0">
+        <CardContent className="grid gap-3 pt-0 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-1">
           {loading ? (
-            Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-10" />)
+            Array.from({ length: 3 }).map((_, index) => <Skeleton key={index} className="h-16 rounded-xl" />)
           ) : !paymentTotals ? (
-            <p className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+            <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 sm:col-span-3 lg:col-span-1 xl:col-span-1">
               Payment totals are unavailable.
             </p>
           ) : (
             <>
-              <div className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2.5">
-                <span className="text-slate-600">Cash</span>
-                <span className="font-semibold">{formatCurrencyLkr(paymentTotals.totalCash)}</span>
+              <div className="rounded-xl border border-slate-100 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Cash</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{formatCurrencyLkr(paymentTotals.totalCash)}</p>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2.5">
-                <span className="text-slate-600">Cheques</span>
-                <span className="font-semibold">{formatCurrencyLkr(paymentTotals.totalCheques)}</span>
+              <div className="rounded-xl border border-slate-100 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Cheques</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{formatCurrencyLkr(paymentTotals.totalCheques)}</p>
               </div>
-              <div className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2.5">
-                <span className="text-slate-600">Credit</span>
-                <span className="font-semibold">{formatCurrencyLkr(paymentTotals.totalCredit)}</span>
+              <div className="rounded-xl border border-slate-100 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Credit</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{formatCurrencyLkr(paymentTotals.totalCredit)}</p>
               </div>
             </>
           )}
