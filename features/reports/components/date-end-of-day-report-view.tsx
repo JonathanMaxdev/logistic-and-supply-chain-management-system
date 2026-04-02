@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { ArrowLeft, CheckCircle2, Printer, RefreshCw, Save, Send, ShieldCheck, TriangleAlert, XCircle } from "lucide-react";
 
+import { AppShell } from "@/components/layout/app-shell";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -471,52 +472,42 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
     { label: "Prepared By", value: report.staffName }
   ] : [];
 
+  const sectionTabs = [
+    { id: "date-header", label: "Header" },
+    { id: "date-invoices", label: "Invoices" },
+    { id: "date-expenses", label: "Expenses" },
+    { id: "date-cash", label: "Cash Check" },
+    { id: "date-bills", label: "Bill Counts" },
+    { id: "date-summary", label: "Summary" },
+    { id: "date-actions", label: "Actions" }
+  ];
+
   if (loading) {
     return (
-      <div className="min-h-screen lg:flex">
-        <div className="print:hidden">
-          <DashboardSidebar activeKey="reports" />
-        </div>
-        <main className="flex-1 p-4 sm:p-6">
-          <div className="mx-auto max-w-7xl space-y-5">
-            <Skeleton className="h-40" />
-            <Skeleton className="h-72" />
-            <Skeleton className="h-72" />
-        </div>
-      </main>
-    </div>
-  );
+      <AppShell sidebar={<DashboardSidebar activeKey="reports" />}>
+        <Skeleton className="h-40" />
+        <Skeleton className="h-72" />
+        <Skeleton className="h-72" />
+      </AppShell>
+    );
   }
 
   if (!loading && (error || !report || !status || !form)) {
     return (
-      <div className="min-h-screen lg:flex">
-        <div className="print:hidden">
-          <DashboardSidebar activeKey="reports" />
-        </div>
-        <main className="flex-1 p-4 sm:p-6">
-          <div className="mx-auto max-w-4xl space-y-5">
-            <Alert variant="destructive">
-              <div className="flex items-center justify-between gap-3">
-                <span>{error ?? "Report not found."}</span>
-                <Button variant="outline" size="sm" onClick={reload} disabled={saving}>Retry</Button>
-              </div>
-            </Alert>
-        </div>
-      </main>
-    </div>
-  );
+      <AppShell sidebar={<DashboardSidebar activeKey="reports" />} width="narrow">
+        <Alert variant="destructive">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{error ?? "Report not found."}</span>
+            <Button variant="outline" size="sm" onClick={reload} disabled={saving}>Retry</Button>
+          </div>
+        </Alert>
+      </AppShell>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:flex print:block print:bg-white">
-      <div className="print:hidden">
-        <DashboardSidebar activeKey="reports" />
-      </div>
-
-      <main className="flex-1 p-4 sm:p-6 print:p-0">
-        <div className="mx-auto max-w-7xl space-y-5 print:max-w-none print:space-y-4">
-          <header className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card print:rounded-none print:border-0 print:p-0 print:shadow-none sm:p-6">
+    <AppShell sidebar={<DashboardSidebar activeKey="reports" />} className="print:block print:bg-white" mainClassName="print:p-0" contentClassName="space-y-5 pb-24 md:pb-0 print:max-w-none print:space-y-4 print:pb-0">
+          <header className="app-page-header print:rounded-none print:border-0 print:p-0 print:shadow-none">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Operations / DATE Closing Sheet</p>
@@ -531,24 +522,24 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 print:hidden">
+              <div className="grid w-full gap-2 sm:grid-cols-2 xl:flex xl:w-auto xl:flex-wrap xl:items-center print:hidden">
                 <DailyReportStatusBadge status={status!} />
-                <Button asChild variant="outline">
+                <Button asChild className="w-full xl:w-auto" variant="outline">
                   <Link href={`/loading-summaries/${report!.loadingSummaryId}`}>
                     Morning Loading
                   </Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button asChild className="w-full xl:w-auto" variant="outline">
                   <Link href={`/reports/${report!.id}`} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
                     Workspace
                   </Link>
                 </Button>
-                <Button variant="outline" onClick={() => void reload()} disabled={saving || sheetSaving}>
+                <Button className="w-full xl:w-auto" variant="outline" onClick={() => void reload()} disabled={saving || sheetSaving}>
                   <RefreshCw className="h-4 w-4" />
                   Refresh
                 </Button>
-                <Button variant="outline" onClick={() => window.print()}>
+                <Button className="w-full xl:w-auto" variant="outline" onClick={() => window.print()}>
                   <Printer className="h-4 w-4" />
                   Print
                 </Button>
@@ -569,7 +560,21 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
           {sheetError ? <Alert variant="destructive" className="print:hidden">{sheetError}</Alert> : null}
           {sheetMessage ? <Alert className="print:hidden">{sheetMessage}</Alert> : null}
 
-          <Card className="print:break-inside-avoid">
+          <nav className="sticky top-[4.25rem] z-20 -mx-4 overflow-x-auto border-y border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:top-[4.5rem] sm:-mx-6 sm:px-6 md:hidden print:hidden">
+            <div className="flex min-w-max gap-2">
+              {sectionTabs.map((section) => (
+                <a
+                  key={section.id}
+                  href={`#${section.id}`}
+                  className="inline-flex h-10 items-center rounded-full border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
+                >
+                  {section.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+
+          <Card id="date-header" className="scroll-mt-24 print:break-inside-avoid">
             <CardHeader>
               <CardTitle>1. Header</CardTitle>
               <CardDescription>Date, route, name, and closing remarks.</CardDescription>
@@ -627,7 +632,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
               </form>
             </CardContent>
           </Card>
-          <section className="space-y-4 print:break-inside-avoid">
+          <section id="date-invoices" className="scroll-mt-24 space-y-4 print:break-inside-avoid">
             <div>
               <h2 className="text-lg font-bold text-slate-900">2. Invoice / Payment Section</h2>
               <p className="text-sm text-slate-500">Capture invoice rows with cash, cheque, and credit values.</p>
@@ -642,7 +647,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             />
           </section>
 
-          <section className="space-y-4 print:break-inside-avoid">
+          <section id="date-expenses" className="scroll-mt-24 space-y-4 print:break-inside-avoid">
             <div>
               <h2 className="text-lg font-bold text-slate-900">3. Expenses Section</h2>
               <p className="text-sm text-slate-500">Record route expenses before final closing.</p>
@@ -671,7 +676,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             </div>
           </section>
 
-          <section className="space-y-4 print:break-inside-avoid">
+          <section id="date-cash" className="scroll-mt-24 space-y-4 print:break-inside-avoid">
             <div>
               <h2 className="text-lg font-bold text-slate-900">5. Cash Checking Denomination Block</h2>
               <p className="text-sm text-slate-500">Count note quantities and reconcile physical cash.</p>
@@ -739,7 +744,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             </Card>
           </section>
 
-          <section className="space-y-4 print:break-inside-avoid">
+          <section id="date-summary" className="scroll-mt-24 space-y-4 print:break-inside-avoid">
             <div>
               <h2 className="text-lg font-bold text-slate-900">7. Summary Block</h2>
               <p className="text-sm text-slate-500">Closing sales and profit summary with backend-derived margin and net profit.</p>
@@ -789,7 +794,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             </Card>
           </section>
 
-          <section className="space-y-4 print:break-inside-avoid">
+          <section id="date-bills" className="scroll-mt-24 space-y-4 print:break-inside-avoid">
             <div>
               <h2 className="text-lg font-bold text-slate-900">8. Bill Count Block</h2>
               <p className="text-sm text-slate-500">Capture total, delivered, and cancelled bills for route closing.</p>
@@ -845,7 +850,7 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             </Card>
           </section>
 
-          <section className="space-y-4 print:hidden">
+          <section id="date-actions" className="scroll-mt-24 space-y-4 print:hidden">
             <div>
               <h2 className="text-lg font-bold text-slate-900">9. Final Actions</h2>
               <p className="text-sm text-slate-500">Save, submit, or review the DATE closing sheet according to the current workflow state.</p>
@@ -906,34 +911,61 @@ export function DateEndOfDayReportView({ reportId }: { reportId: string }) {
             ) : null}
 
             <Card>
-              <CardContent className="flex flex-wrap gap-2 p-6 print:hidden">
+              <CardContent className="grid gap-2 p-6 sm:grid-cols-2 xl:flex xl:flex-wrap print:hidden">
                 {canEditDateSheet ? (
-                  <Button variant="outline" onClick={() => void handleSaveSheet()} disabled={sheetSaving || saving}>
+                  <Button className="w-full xl:w-auto" variant="outline" onClick={() => void handleSaveSheet()} disabled={sheetSaving || saving}>
                     <Save className={`h-4 w-4 ${sheetSaving ? "animate-pulse" : ""}`} />
                     Save Draft
                   </Button>
                 ) : null}
                 {canSubmit ? (
-                  <Button onClick={() => void handleSubmitReport()} disabled={sheetSaving || saving || !canSubmitFromDateSheet}>
+                  <Button className="w-full xl:w-auto" onClick={() => void handleSubmitReport()} disabled={sheetSaving || saving || !canSubmitFromDateSheet}>
                     <Send className="h-4 w-4" />
                     Submit Report
                   </Button>
                 ) : null}
-                {canApprove ? <Button onClick={actions.approve} disabled={saving}>Approve</Button> : null}
-                {canReject ? <Button variant="outline" onClick={() => setShowRejectForm(true)} disabled={saving}>Reject</Button> : null}
-                {canReopen ? <Button variant="secondary" onClick={actions.reopen} disabled={saving}>Reopen</Button> : null}
-                <Button variant="outline" onClick={() => window.print()}>
+                {canApprove ? <Button className="w-full xl:w-auto" onClick={actions.approve} disabled={saving}>Approve</Button> : null}
+                {canReject ? <Button className="w-full xl:w-auto" variant="outline" onClick={() => setShowRejectForm(true)} disabled={saving}>Reject</Button> : null}
+                {canReopen ? <Button className="w-full xl:w-auto" variant="secondary" onClick={actions.reopen} disabled={saving}>Reopen</Button> : null}
+                <Button className="w-full xl:w-auto" variant="outline" onClick={() => window.print()}>
                   <Printer className="h-4 w-4" />
                   Print Sheet
                 </Button>
               </CardContent>
             </Card>
           </section>
-        </div>
-      </main>
-    </div>
+
+          <div className="sticky bottom-0 z-20 -mx-4 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur sm:-mx-6 sm:px-6 md:hidden print:hidden">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {canEditDateSheet ? (
+                <Button variant="outline" onClick={() => void handleSaveSheet()} disabled={sheetSaving || saving}>
+                  <Save className={`h-4 w-4 ${sheetSaving ? "animate-pulse" : ""}`} />
+                  Save Draft
+                </Button>
+              ) : null}
+              {canSubmit ? (
+                <Button onClick={() => void handleSubmitReport()} disabled={sheetSaving || saving || !canSubmitFromDateSheet}>
+                  <Send className="h-4 w-4" />
+                  Submit Report
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => window.print()}>
+                  <Printer className="h-4 w-4" />
+                  Print Sheet
+                </Button>
+              )}
+            </div>
+          </div>      </AppShell>
   );
 }
+
+
+
+
+
+
+
+
 
 
 

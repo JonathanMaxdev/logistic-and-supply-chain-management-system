@@ -149,7 +149,7 @@ export function DialogContent({ children, className, initialFocusRef, ...props }
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <button
         type="button"
         className="absolute inset-0 bg-slate-900/45 backdrop-blur-[1px]"
@@ -157,15 +157,20 @@ export function DialogContent({ children, className, initialFocusRef, ...props }
         aria-label="Close dialog"
       />
 
-      <div
-        ref={contentRef}
-        role="dialog"
-        aria-modal="true"
-        tabIndex={-1}
-        className={cn("relative z-10 w-full", className)}
-        {...props}
-      >
-        {children}
+      <div className="flex min-h-full items-stretch justify-center p-0 sm:items-center sm:p-6">
+        <div
+          ref={contentRef}
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
+          className={cn(
+            "relative z-10 w-full max-h-[100dvh] overflow-y-auto overscroll-contain sm:max-h-[calc(100vh-3rem)]",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </div>
       </div>
     </div>,
     document.body

@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DailyReportInventoryEntryDto, DailyReportReturnDamageEntryDto } from "@/types/domain/report";
 
+import { AppShell } from "@/components/layout/app-shell";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardSidebar } from "@/features/dashboard/components/dashboard-sidebar";
 import {
   fetchExpenseCategoryOptions,
   fetchProductOptions,
@@ -475,7 +477,7 @@ export function DailyReportWorkspaceView({ reportId }: { reportId: string }) {
   }, [report]);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+    <AppShell sidebar={<DashboardSidebar activeKey="reports" />} contentClassName="space-y-5">
       {loading ? (
         <>
           <Skeleton className="h-36" />
@@ -724,9 +726,12 @@ export function DailyReportWorkspaceView({ reportId }: { reportId: string }) {
           ) : null}
         </>
       ) : null}
-    </main>
+    </AppShell>
   );
 }
+
+
+
 
 
 

@@ -39,10 +39,10 @@ export function RouteProgramsFilterToolbar({
   onOpenCreate
 }: RouteProgramsFilterToolbarProps) {
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <section className="app-toolbar">
+      <div className="app-toolbar-head">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Operations / Route Programs</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="app-toolbar-actions">
           <Button variant="outline" onClick={onReload} disabled={refreshing}>
             <RefreshCw className={refreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
             {refreshing ? "Refreshing..." : "Refresh"}
@@ -56,7 +56,7 @@ export function RouteProgramsFilterToolbar({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="app-filter-grid">
         <label className="space-y-1 xl:col-span-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Search</span>
           <div className="relative">
@@ -114,7 +114,7 @@ export function RouteProgramsFilterToolbar({
         </label>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <Button variant="ghost" onClick={onClearFilters}>
           <X className="h-4 w-4" />
           Clear All Filters
@@ -123,3 +123,4 @@ export function RouteProgramsFilterToolbar({
     </section>
   );
 }
+

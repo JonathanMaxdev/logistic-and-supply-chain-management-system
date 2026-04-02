@@ -86,6 +86,36 @@ function normalizeMoney(value: number) {
   return Number(value.toFixed(2));
 }
 
+function MoneyField({
+  label,
+  value,
+  onChange,
+  disabled,
+  error
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  error?: string;
+}) {
+  return (
+    <label className="space-y-1.5">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-11 w-full rounded-md border border-slate-200 px-3 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+        disabled={disabled}
+      />
+      {error ? <p className="text-xs text-rose-600">{error}</p> : null}
+    </label>
+  );
+}
+
 export function ReportInvoiceEntriesPanel({
   rows,
   loading,
@@ -211,21 +241,23 @@ export function ReportInvoiceEntriesPanel({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <CardTitle>Invoice Entries</CardTitle>
-          <CardDescription>Capture invoice-level payment split for this report.</CardDescription>
-        </div>
+      <CardHeader className="gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>Invoice Entries</CardTitle>
+            <CardDescription>Capture invoice-level payment split for this report.</CardDescription>
+          </div>
 
-        <div className="flex gap-2 print:hidden">
-          <Button variant="outline" onClick={addRow} disabled={!canEdit || saving || loading}>
-            <Plus className="h-4 w-4" />
-            Add Row
-          </Button>
-          <Button onClick={handleSave} disabled={!canEdit || saving || loading}>
-            <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
-            Save Entries
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2 lg:flex print:hidden">
+            <Button className="w-full lg:w-auto" variant="outline" onClick={addRow} disabled={!canEdit || saving || loading}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+            <Button className="w-full lg:w-auto" onClick={handleSave} disabled={!canEdit || saving || loading}>
+              <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
+              Save Entries
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
@@ -236,8 +268,90 @@ export function ReportInvoiceEntriesPanel({
           <Alert>Invoice entries are read-only because this report is no longer in draft.</Alert>
         ) : null}
 
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
-          <table className="min-w-full text-sm">
+        <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm sm:grid-cols-3">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500">Cash</p>
+            <p className="mt-1 text-lg font-semibold text-slate-900">{moneyFormat.format(totals.cash)}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500">Cheque</p>
+            <p className="mt-1 text-lg font-semibold text-slate-900">{moneyFormat.format(totals.cheque)}</p>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-wider text-slate-500">Credit</p>
+            <p className="mt-1 text-lg font-semibold text-slate-900">{moneyFormat.format(totals.credit)}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 md:hidden">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, index) => <Skeleton key={`invoice-mobile-${index}`} className="h-72 w-full rounded-xl" />)
+          ) : editableRows.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 px-4 py-10 text-center text-sm text-slate-500">
+              No invoice entries yet. Add a row to begin data entry.
+            </div>
+          ) : (
+            editableRows.map((row, index) => {
+              const rowError = fieldErrors[row.clientId];
+              const lineTotal = (Number.isFinite(parseMoneyInput(row.cashAmount)) ? parseMoneyInput(row.cashAmount) : 0)
+                + (Number.isFinite(parseMoneyInput(row.chequeAmount)) ? parseMoneyInput(row.chequeAmount) : 0)
+                + (Number.isFinite(parseMoneyInput(row.creditAmount)) ? parseMoneyInput(row.creditAmount) : 0);
+
+              return (
+                <article key={row.clientId} className="space-y-4 rounded-xl border border-slate-200 p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Invoice Line {index + 1}</p>
+                      <p className="mt-1 text-sm text-slate-500">Capture payment split and notes for this invoice.</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => removeRow(row.clientId)} disabled={!canEdit || saving}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Invoice No</span>
+                    <input
+                      value={row.invoiceNo}
+                      onChange={(event) => updateRow(row.clientId, "invoiceNo", event.target.value)}
+                      className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                    />
+                    {rowError?.invoiceNo ? <p className="text-xs text-rose-600">{rowError.invoiceNo}</p> : null}
+                  </label>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <MoneyField label="Cash (LKR)" value={row.cashAmount} onChange={(value) => updateRow(row.clientId, "cashAmount", value)} disabled={!canEdit || saving} error={rowError?.cashAmount} />
+                    <MoneyField label="Cheque (LKR)" value={row.chequeAmount} onChange={(value) => updateRow(row.clientId, "chequeAmount", value)} disabled={!canEdit || saving} error={rowError?.chequeAmount} />
+                    <MoneyField label="Credit (LKR)" value={row.creditAmount} onChange={(value) => updateRow(row.clientId, "creditAmount", value)} disabled={!canEdit || saving} error={rowError?.creditAmount} />
+                  </div>
+
+                  {rowError?.amountGroup ? <p className="text-xs text-rose-600">{rowError.amountGroup}</p> : null}
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Notes</span>
+                    <textarea
+                      rows={3}
+                      value={row.notes}
+                      onChange={(event) => updateRow(row.clientId, "notes", event.target.value)}
+                      className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                    />
+                    {rowError?.notes ? <p className="text-xs text-rose-600">{rowError.notes}</p> : null}
+                  </label>
+
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Line Total</p>
+                    <p className="mt-1 text-lg font-semibold text-slate-900">{moneyFormat.format(lineTotal)}</p>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
+          <table className="min-w-[900px] text-sm xl:min-w-full">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.14em] text-slate-500">
               <tr>
                 <th className="px-3 py-3">Line #</th>
@@ -356,4 +470,3 @@ export function ReportInvoiceEntriesPanel({
     </Card>
   );
 }
-

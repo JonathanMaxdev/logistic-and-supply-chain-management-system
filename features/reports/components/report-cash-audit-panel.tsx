@@ -112,17 +112,21 @@ export function ReportCashAuditPanel({
   return (
     <section className="space-y-4">
       <Card>
-        <CardHeader className="pb-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Operations / Report {reportId}</p>
-          <CardTitle className="mt-2 text-3xl">Denomination Audit</CardTitle>
-          <CardDescription>Capture note counts and reconcile physical cash with ledger balances.</CardDescription>
+        <CardHeader className="gap-3 pb-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Operations / Report {reportId}</p>
+              <CardTitle className="mt-2 text-2xl sm:text-3xl">Denomination Audit</CardTitle>
+              <CardDescription>Capture note counts and reconcile physical cash with ledger balances.</CardDescription>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:flex print:hidden">
+              <Button className="w-full lg:w-auto" variant="outline" onClick={handleSave} disabled={saving || !canEdit || loading}>Save Draft</Button>
+              {showFinalizeAction ? (
+                <Button className="w-full lg:w-auto" onClick={onFinalize} disabled={saving || !canFinalize || loading}>Confirm and Finalize</Button>
+              ) : null}
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2 print:hidden">
-          <Button variant="outline" onClick={handleSave} disabled={saving || !canEdit || loading}>Save Draft</Button>
-          {showFinalizeAction ? (
-            <Button onClick={onFinalize} disabled={saving || !canFinalize || loading}>Confirm and Finalize</Button>
-          ) : null}
-        </CardContent>
       </Card>
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
@@ -139,37 +143,71 @@ export function ReportCashAuditPanel({
                 {Array.from({ length: 10 }).map((_, index) => <Skeleton key={index} className="h-10" />)}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.14em] text-slate-500">
-                    <tr>
-                      <th className="px-5 py-3">Denomination</th>
-                      <th className="px-5 py-3 text-right">Count</th>
-                      <th className="px-5 py-3 text-right">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-sm">
-                    {draftRows.map((row) => (
-                      <tr key={row.denominationValue}>
-                        <td className="px-5 py-3 font-semibold text-slate-900">{formatCurrencyLkr(row.denominationValue)}</td>
-                        <td className="px-5 py-3 text-right">
-                          <input
-                            type="number"
-                            inputMode="numeric"
-                            min={0}
-                            step={1}
-                            value={row.noteCount}
-                            disabled={!canEdit || saving}
-                            onChange={(event) => handleCountChange(row.denominationValue, event.target.value)}
-                            className="h-9 w-24 rounded-md border border-slate-200 px-2 text-right font-semibold outline-none ring-offset-2 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
-                          />
-                        </td>
-                        <td className="px-5 py-3 text-right font-semibold text-slate-800">{formatCurrencyLkr(row.lineTotal)}</td>
+              <>
+                <div className="space-y-3 p-4 md:hidden">
+                  {draftRows.map((row) => (
+                    <div key={row.denominationValue} className="rounded-xl border border-slate-200 p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Denomination</p>
+                          <p className="mt-1 text-base font-semibold text-slate-900">{formatCurrencyLkr(row.denominationValue)}</p>
+                        </div>
+                        <div className="min-w-[112px]">
+                          <label className="space-y-1.5 block text-right">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Count</span>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={1}
+                              value={row.noteCount}
+                              disabled={!canEdit || saving}
+                              onChange={(event) => handleCountChange(row.denominationValue, event.target.value)}
+                              className="h-11 w-full rounded-md border border-slate-200 px-3 text-right font-semibold outline-none ring-offset-2 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Subtotal</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900">{formatCurrencyLkr(row.lineTotal)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="min-w-full">
+                    <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.14em] text-slate-500">
+                      <tr>
+                        <th className="px-5 py-3">Denomination</th>
+                        <th className="px-5 py-3 text-right">Count</th>
+                        <th className="px-5 py-3 text-right">Subtotal</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm">
+                      {draftRows.map((row) => (
+                        <tr key={row.denominationValue}>
+                          <td className="px-5 py-3 font-semibold text-slate-900">{formatCurrencyLkr(row.denominationValue)}</td>
+                          <td className="px-5 py-3 text-right">
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              step={1}
+                              value={row.noteCount}
+                              disabled={!canEdit || saving}
+                              onChange={(event) => handleCountChange(row.denominationValue, event.target.value)}
+                              className="h-9 w-24 rounded-md border border-slate-200 px-2 text-right font-semibold outline-none ring-offset-2 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                            />
+                          </td>
+                          <td className="px-5 py-3 text-right font-semibold text-slate-800">{formatCurrencyLkr(row.lineTotal)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -180,11 +218,12 @@ export function ReportCashAuditPanel({
               <CardTitle>Cash Reconciliation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <div className="flex items-center justify-between"><span className="text-slate-600">Cash in Hand</span><span className="font-semibold">{formatCurrencyLkr(cashInHand)}</span></div>
-              <div className="flex items-center justify-between"><span className="text-slate-600">Cash in Bank</span><span className="font-semibold">{formatCurrencyLkr(cashInBank)}</span></div>
-              <div className="flex items-center justify-between border-t border-slate-100 pt-2"><span className="text-slate-600">Total Ledger Balance</span><span className="font-semibold">{formatCurrencyLkr(cashBookTotal)}</span></div>
-              <div className="flex items-center justify-between"><span className="text-slate-600">Total Physical Cash</span><span className="font-semibold">{formatCurrencyLkr(cashPhysicalTotal)}</span></div>
-              <div className="flex items-center justify-between"><span className="text-slate-600">Preview Physical (unsaved)</span><span className="font-semibold">{formatCurrencyLkr(previewPhysicalTotal)}</span></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-slate-600">Cash in Hand</span><span className="text-right font-semibold">{formatCurrencyLkr(cashInHand)}</span></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-slate-600">Cash in Bank</span><span className="text-right font-semibold">{formatCurrencyLkr(cashInBank)}</span></div>
+              <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-2"><span className="text-slate-600">Total Ledger Balance</span><span className="text-right font-semibold">{formatCurrencyLkr(cashBookTotal)}</span></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-slate-600">Total Physical Cash</span><span className="text-right font-semibold">{formatCurrencyLkr(cashPhysicalTotal)}</span></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-slate-600">Preview Physical (unsaved)</span><span className="text-right font-semibold">{formatCurrencyLkr(previewPhysicalTotal)}</span></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-slate-600">Saved Difference</span><span className="text-right font-semibold">{formatCurrencyLkr(cashDifference)}</span></div>
 
               <div className={`mt-2 rounded-md px-3 py-2 ${isBalanced ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
                 <div className="flex items-center gap-2 font-semibold">

@@ -37,7 +37,7 @@ export function DailyReportsFilterBar({
   onSearchChange
 }: DailyReportsFilterBarProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
+    <section className="app-toolbar">
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <label className="space-y-1">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Date From</span>
@@ -103,7 +103,7 @@ export function DailyReportsFilterBar({
         </label>
       </div>
 
-      <label className="mt-3 block space-y-1">
+      <label className="block space-y-1">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Search</span>
         <input
           value={searchInput}

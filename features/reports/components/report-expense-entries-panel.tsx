@@ -190,21 +190,23 @@ export function ReportExpenseEntriesPanel({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <CardTitle>Expense Entries</CardTitle>
-          <CardDescription>Capture per-line operational expenses for this report.</CardDescription>
-        </div>
+      <CardHeader className="gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>Expense Entries</CardTitle>
+            <CardDescription>Capture per-line operational expenses for this report.</CardDescription>
+          </div>
 
-        <div className="flex gap-2 print:hidden">
-          <Button variant="outline" onClick={addRow} disabled={!canEdit || saving || loading}>
-            <Plus className="h-4 w-4" />
-            Add Row
-          </Button>
-          <Button onClick={handleSave} disabled={!canEdit || saving || loading}>
-            <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
-            Save Entries
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2 lg:flex print:hidden">
+            <Button className="w-full lg:w-auto" variant="outline" onClick={addRow} disabled={!canEdit || saving || loading}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+            <Button className="w-full lg:w-auto" onClick={handleSave} disabled={!canEdit || saving || loading}>
+              <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
+              Save Entries
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
@@ -215,8 +217,96 @@ export function ReportExpenseEntriesPanel({
           <Alert>Expense entries are read-only because this report is no longer in draft.</Alert>
         ) : null}
 
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
-          <table className="min-w-full text-sm">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+          <p className="text-xs uppercase tracking-wider text-slate-500">Total Expenses</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{moneyFormat.format(totalExpenses)}</p>
+        </div>
+
+        <div className="space-y-4 md:hidden">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, index) => <Skeleton key={`expense-mobile-${index}`} className="h-80 w-full rounded-xl" />)
+          ) : editableRows.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 px-4 py-10 text-center text-sm text-slate-500">
+              No expense entries yet. Add a row to capture expenses.
+            </div>
+          ) : (
+            editableRows.map((row, index) => {
+              const rowError = fieldErrors[row.clientId];
+
+              return (
+                <article key={row.clientId} className="space-y-4 rounded-xl border border-slate-200 p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Expense Line {index + 1}</p>
+                      <p className="mt-1 text-sm text-slate-500">Record category, amount, and notes for this expense.</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => removeRow(row.clientId)} disabled={!canEdit || saving}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Expense Category</span>
+                    <select
+                      value={row.expenseCategoryId}
+                      onChange={(event) => updateRow(row.clientId, "expenseCategoryId", event.target.value)}
+                      className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                    >
+                      <option value="">Select category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>{category.categoryName}</option>
+                      ))}
+                    </select>
+                    {rowError?.expenseCategoryId ? <p className="text-xs text-rose-600">{rowError.expenseCategoryId}</p> : null}
+                  </label>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Custom Expense Name</span>
+                    <input
+                      value={row.customExpenseName}
+                      onChange={(event) => updateRow(row.clientId, "customExpenseName", event.target.value)}
+                      className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                      placeholder="Optional custom name"
+                    />
+                    {rowError?.customExpenseName ? <p className="text-xs text-rose-600">{rowError.customExpenseName}</p> : null}
+                    {rowError?.source ? <p className="text-xs text-rose-600">{rowError.source}</p> : null}
+                  </label>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Amount (LKR)</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={row.amount}
+                      onChange={(event) => updateRow(row.clientId, "amount", event.target.value)}
+                      className="h-11 w-full rounded-md border border-slate-200 px-3 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                    />
+                    {rowError?.amount ? <p className="text-xs text-rose-600">{rowError.amount}</p> : null}
+                  </label>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Notes</span>
+                    <textarea
+                      rows={3}
+                      value={row.notes}
+                      onChange={(event) => updateRow(row.clientId, "notes", event.target.value)}
+                      className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                      disabled={!canEdit || saving}
+                    />
+                    {rowError?.notes ? <p className="text-xs text-rose-600">{rowError.notes}</p> : null}
+                  </label>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
+          <table className="min-w-[920px] text-sm xl:min-w-full">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.14em] text-slate-500">
               <tr>
                 <th className="px-3 py-3">Line #</th>
@@ -323,4 +413,3 @@ export function ReportExpenseEntriesPanel({
     </Card>
   );
 }
-

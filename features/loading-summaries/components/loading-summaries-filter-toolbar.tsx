@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Plus, RefreshCw, Search, X } from "lucide-react";
 
@@ -44,16 +44,16 @@ export function LoadingSummariesFilterToolbar({
   onOpenCreate
 }: LoadingSummariesFilterToolbarProps) {
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <section className="app-toolbar">
+      <div className="app-toolbar-head">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Operations / Morning Dispatch</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={onReload} disabled={refreshing}>
+        <div className="app-toolbar-actions grid w-full gap-2 sm:grid-cols-2 xl:flex xl:w-auto">
+          <Button className="w-full xl:w-auto" variant="outline" onClick={onReload} disabled={refreshing}>
             <RefreshCw className={refreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
             {refreshing ? "Refreshing..." : "Refresh"}
           </Button>
           {canCreate ? (
-            <Button onClick={onOpenCreate}>
+            <Button className="w-full xl:w-auto" onClick={onOpenCreate}>
               <Plus className="h-4 w-4" />
               Create New Loading Summary
             </Button>
@@ -125,8 +125,8 @@ export function LoadingSummariesFilterToolbar({
         </div>
       </label>
 
-      <div className="flex justify-end">
-        <Button variant="ghost" onClick={onClearFilters}>
+      <div className="flex justify-stretch sm:justify-end">
+        <Button className="w-full sm:w-auto" variant="ghost" onClick={onClearFilters}>
           <X className="h-4 w-4" />
           Clear All Filters
         </Button>

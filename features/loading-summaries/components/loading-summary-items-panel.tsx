@@ -155,6 +155,51 @@ function buildVarianceLabel(varianceQty: number | null) {
   return "Matched";
 }
 
+function SummaryMetric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function QuantityInput({
+  label,
+  value,
+  onChange,
+  disabled,
+  quantityModeLabel,
+  helper,
+  error
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  quantityModeLabel: string;
+  helper: string | null;
+  error?: string;
+}) {
+  return (
+    <label className="space-y-1.5">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
+      <input
+        type="number"
+        step="1"
+        min="0"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-11 w-full rounded-md border border-slate-200 px-3 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+        disabled={disabled}
+      />
+      <p className="text-xs text-slate-500">{quantityModeLabel}</p>
+      {helper ? <p className="text-xs text-slate-500">{helper}</p> : null}
+      {error ? <p className="text-xs text-rose-600">{error}</p> : null}
+    </label>
+  );
+}
+
 export function LoadingSummaryItemsPanel({
   rows,
   products,
@@ -312,27 +357,29 @@ export function LoadingSummaryItemsPanel({
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <CardTitle>Route Product Movement Sheet</CardTitle>
-          <CardDescription>
-            Morning loading and evening reconciliation live on the same route-wise sheet. Save product movement here, then use DATE only for financial close.
-          </CardDescription>
-        </div>
+      <CardHeader className="gap-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>Route Product Movement Sheet</CardTitle>
+            <CardDescription>
+              Morning loading and evening reconciliation live on the same route-wise sheet. Save product movement here, then use DATE only for financial close.
+            </CardDescription>
+          </div>
 
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={addRow} disabled={!canEditStructure || saving || loading || products.length === 0}>
-            <Plus className="h-4 w-4" />
-            Add Row
-          </Button>
-          <Button onClick={handleSave} disabled={!canEdit || saving || loading || (products.length === 0 && editableRows.length === 0)}>
-            <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
-            {canEditEveningReconciliation ? "Save Reconciliation" : "Save Morning Loading"}
-          </Button>
+          <div className="grid gap-2 sm:grid-cols-2 lg:flex">
+            <Button className="w-full lg:w-auto" variant="outline" onClick={addRow} disabled={!canEditStructure || saving || loading || products.length === 0}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+            <Button className="w-full lg:w-auto" onClick={handleSave} disabled={!canEdit || saving || loading || (products.length === 0 && editableRows.length === 0)}>
+              <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
+              {canEditEveningReconciliation ? "Save Reconciliation" : "Save Morning Loading"}
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pb-24 md:pb-6">
         {error ? <Alert variant="destructive">{error}</Alert> : null}
 
         {!canEdit ? (
@@ -359,35 +406,140 @@ export function LoadingSummaryItemsPanel({
           </Alert>
         )}
 
-        <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm md:grid-cols-3 xl:grid-cols-6">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">Current Stage</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{stageLabel}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">Loading Qty</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{totals.loadingQty}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">Sales Qty</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{totals.salesQty}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">Balance Qty</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{totals.balanceQty}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">Lorry Qty</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{totals.lorryQty}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider text-slate-500">More / Less</p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{totals.varianceQty}</p>
-          </div>
+        <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm sm:grid-cols-2 xl:grid-cols-6">
+          <SummaryMetric label="Current Stage" value={stageLabel} />
+          <SummaryMetric label="Loading Qty" value={totals.loadingQty} />
+          <SummaryMetric label="Sales Qty" value={totals.salesQty} />
+          <SummaryMetric label="Balance Qty" value={totals.balanceQty} />
+          <SummaryMetric label="Lorry Qty" value={totals.lorryQty} />
+          <SummaryMetric label="More / Less" value={totals.varianceQty} />
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
-          <table className="min-w-full text-sm">
+        <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm sm:grid-cols-2 xl:grid-cols-5">
+          <SummaryMetric label="Loaded Value" value={moneyFormat.format(totals.totalValue)} />
+          <SummaryMetric label="Tracked Lines" value={totals.lineCount} />
+          <SummaryMetric label="Morning Editing" value={canEditMorningLoading ? "Open" : "Locked"} />
+          <SummaryMetric label="Evening Editing" value={canEditEveningReconciliation ? "Open" : "Locked"} />
+          <SummaryMetric label="Products Available" value={products.length} />
+        </div>
+
+        <div className="space-y-4 md:hidden">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, index) => <Skeleton key={`mobile-${index}`} className="h-72 w-full rounded-xl" />)
+          ) : editableRows.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 px-4 py-10 text-center text-sm text-slate-500">
+              No product rows yet. Add a row to start recording this route's movement sheet.
+            </div>
+          ) : (
+            editableRows.map((row, index) => {
+              const rowError = fieldErrors[row.clientId];
+              const product = resolveProduct(row, products);
+              const loadingQty = parseIntegerInput(row.loadingQty);
+              const salesQty = parseIntegerInput(row.salesQty);
+              const lorryQty = parseIntegerInput(row.lorryQty);
+              const balanceQty = calculateBalanceQty(loadingQty, salesQty);
+              const varianceQty = calculateVarianceQty(balanceQty, lorryQty);
+              const quantityModeLabel = buildQuantityModeLabel(product);
+              const packInfo = buildPackInfoLabel(product);
+              const loadingEquivalent = Number.isFinite(loadingQty) ? buildUnitEquivalentLabel(loadingQty, product) : null;
+              const salesEquivalent = Number.isFinite(salesQty) ? buildUnitEquivalentLabel(salesQty, product) : null;
+              const balanceEquivalent = balanceQty !== null ? buildUnitEquivalentLabel(Math.abs(balanceQty), product) : null;
+              const lorryEquivalent = Number.isFinite(lorryQty) ? buildUnitEquivalentLabel(lorryQty, product) : null;
+              const varianceEquivalent = varianceQty !== null && varianceQty !== 0 ? buildUnitEquivalentLabel(Math.abs(varianceQty), product) : null;
+              const varianceLabel = buildVarianceLabel(varianceQty);
+
+              return (
+                <article key={row.clientId} className="space-y-4 rounded-xl border border-slate-200 p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Line {index + 1}</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">{product.name}</p>
+                      <p className="mt-1 text-xs text-slate-500">Code {product.code}</p>
+                    </div>
+                    <Button className="shrink-0" variant="outline" size="sm" onClick={() => removeRow(row.clientId)} disabled={!canEditStructure || saving}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-1 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+                    <p className="font-medium text-slate-900">{packInfo ?? "Legacy product"}</p>
+                    {product.unitPrice !== null ? <p className="text-slate-600">Rate {moneyFormat.format(product.unitPrice)}</p> : null}
+                    <p className="text-slate-500">{quantityModeLabel}</p>
+                  </div>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Product</span>
+                    {canEditStructure ? (
+                      <select
+                        value={row.productId}
+                        onChange={(event) => updateRow(row.clientId, "productId", event.target.value)}
+                        className="h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                        disabled={!canEditStructure || saving}
+                      >
+                        <option value="">Select product</option>
+                        {products.map((option) => (
+                          <option key={option.id} value={option.id}>{option.productName}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-900">{product.name}</div>
+                    )}
+                    {rowError?.productId ? <p className="text-xs text-rose-600">{rowError.productId}</p> : null}
+                    {rowError?.duplicate ? <p className="text-xs text-rose-600">{rowError.duplicate}</p> : null}
+                  </label>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <QuantityInput
+                      label="Loading Qty"
+                      value={row.loadingQty}
+                      onChange={(value) => updateRow(row.clientId, "loadingQty", value)}
+                      disabled={!canEditMorningLoading || saving}
+                      quantityModeLabel={quantityModeLabel}
+                      helper={loadingEquivalent}
+                      error={rowError?.loadingQty}
+                    />
+                    <QuantityInput
+                      label="Sales Qty"
+                      value={row.salesQty}
+                      onChange={(value) => updateRow(row.clientId, "salesQty", value)}
+                      disabled={!canEditEveningReconciliation || saving}
+                      quantityModeLabel={quantityModeLabel}
+                      helper={salesEquivalent}
+                      error={rowError?.salesQty}
+                    />
+                    <QuantityInput
+                      label="Lorry Qty"
+                      value={row.lorryQty}
+                      onChange={(value) => updateRow(row.clientId, "lorryQty", value)}
+                      disabled={!canEditEveningReconciliation || saving}
+                      quantityModeLabel={quantityModeLabel}
+                      helper={lorryEquivalent}
+                      error={rowError?.lorryQty}
+                    />
+                  </div>
+
+                  <div className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Balance Qty</p>
+                      <p className="mt-1 text-lg font-semibold text-slate-900">{balanceQty ?? "-"}</p>
+                      <p className="mt-1 text-xs text-slate-500">{quantityModeLabel}</p>
+                      {balanceEquivalent ? <p className="mt-1 text-xs text-slate-500">{balanceEquivalent}</p> : null}
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">More / Less</p>
+                      <p className="mt-1 text-lg font-semibold text-slate-900">{varianceQty ?? "-"}</p>
+                      <p className="mt-1 text-xs text-slate-500">{varianceLabel ?? "-"}</p>
+                      {varianceEquivalent ? <p className="mt-1 text-xs text-slate-500">{varianceEquivalent}</p> : null}
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
+          <table className="min-w-[980px] text-sm xl:min-w-full">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.14em] text-slate-500">
               <tr>
                 <th className="px-3 py-3">Line #</th>
@@ -444,7 +596,7 @@ export function LoadingSummaryItemsPanel({
                             <select
                               value={row.productId}
                               onChange={(event) => updateRow(row.clientId, "productId", event.target.value)}
-                              className="h-9 w-56 rounded-md border border-slate-200 bg-white px-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                              className="h-10 w-56 rounded-md border border-slate-200 bg-white px-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
                               disabled={!canEditStructure || saving}
                             >
                               <option value="">Select product</option>
@@ -472,7 +624,7 @@ export function LoadingSummaryItemsPanel({
                           min="0"
                           value={row.loadingQty}
                           onChange={(event) => updateRow(row.clientId, "loadingQty", event.target.value)}
-                          className="h-9 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                          className="h-10 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
                           disabled={!canEditMorningLoading || saving}
                         />
                         <p className="mt-1 text-right text-xs text-slate-500">{quantityModeLabel}</p>
@@ -486,7 +638,7 @@ export function LoadingSummaryItemsPanel({
                           min="0"
                           value={row.salesQty}
                           onChange={(event) => updateRow(row.clientId, "salesQty", event.target.value)}
-                          className="h-9 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                          className="h-10 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
                           disabled={!canEditEveningReconciliation || saving}
                         />
                         <p className="mt-1 text-right text-xs text-slate-500">{quantityModeLabel}</p>
@@ -505,7 +657,7 @@ export function LoadingSummaryItemsPanel({
                           min="0"
                           value={row.lorryQty}
                           onChange={(event) => updateRow(row.clientId, "lorryQty", event.target.value)}
-                          className="h-9 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
+                          className="h-10 w-24 rounded-md border border-slate-200 px-2 text-right text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100"
                           disabled={!canEditEveningReconciliation || saving}
                         />
                         <p className="mt-1 text-right text-xs text-slate-500">{quantityModeLabel}</p>
@@ -518,7 +670,7 @@ export function LoadingSummaryItemsPanel({
                         {varianceEquivalent ? <p className="mt-1 text-xs font-normal text-slate-500">{varianceEquivalent}</p> : null}
                       </td>
                       <td className="px-3 py-3 text-right align-top">
-                        <Button variant="outline" size="sm" onClick={() => removeRow(row.clientId)} disabled={!canEditStructure || saving}>
+                        <Button className="shrink-0" variant="outline" size="sm" onClick={() => removeRow(row.clientId)} disabled={!canEditStructure || saving}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </td>
@@ -529,7 +681,22 @@ export function LoadingSummaryItemsPanel({
             </tbody>
           </table>
         </div>
+      
+        <div className="sticky bottom-0 z-20 -mx-6 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button variant="outline" onClick={addRow} disabled={!canEditStructure || saving || loading || products.length === 0}>
+              <Plus className="h-4 w-4" />
+              Add Row
+            </Button>
+            <Button onClick={handleSave} disabled={!canEdit || saving || loading || (products.length === 0 && editableRows.length === 0)}>
+              <Save className={`h-4 w-4 ${saving ? "animate-pulse" : ""}`} />
+              {canEditEveningReconciliation ? "Save Reconciliation" : "Save Morning Loading"}
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
 }
+
+

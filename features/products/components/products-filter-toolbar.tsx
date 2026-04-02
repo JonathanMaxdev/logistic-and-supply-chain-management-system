@@ -33,15 +33,15 @@ export function ProductsFilterToolbar({
   onOpenCreate
 }: ProductsFilterToolbarProps) {
   return (
-    <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <section className="app-toolbar">
+      <div className="app-toolbar-head">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Inventory / Products</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={onReload} disabled={refreshing}>
+        <div className="app-toolbar-actions grid w-full gap-2 sm:grid-cols-2 xl:flex xl:w-auto">
+          <Button className="w-full xl:w-auto" variant="outline" onClick={onReload} disabled={refreshing}>
             {refreshing ? "Refreshing..." : "Refresh"}
           </Button>
           {canManageProducts ? (
-            <Button onClick={onOpenCreate}>
+            <Button className="w-full xl:w-auto" onClick={onOpenCreate}>
               <Plus className="h-4 w-4" />
               Add New Product
             </Button>
@@ -49,7 +49,7 @@ export function ProductsFilterToolbar({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div className="app-filter-grid">
         <label className="space-y-1 xl:col-span-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Search</span>
           <div className="relative">
@@ -91,8 +91,8 @@ export function ProductsFilterToolbar({
         </label>
       </div>
 
-      <div className="flex justify-end">
-        <Button variant="ghost" onClick={onClearFilters}>
+      <div className="flex justify-stretch sm:justify-end">
+        <Button className="w-full sm:w-auto" variant="ghost" onClick={onClearFilters}>
           <X className="h-4 w-4" />
           Clear All Filters
         </Button>

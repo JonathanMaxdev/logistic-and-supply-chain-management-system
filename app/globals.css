@@ -15,3 +15,65 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .app-shell-main {
+    @apply min-w-0 flex-1 px-3 pb-6 pt-4 sm:px-4 sm:pb-8 sm:pt-5 lg:px-6 lg:py-6;
+  }
+
+  .app-page-container {
+    @apply mx-auto w-full space-y-5 sm:space-y-6;
+  }
+
+  .app-page-header {
+    @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-6;
+  }
+
+  .app-toolbar {
+    @apply space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5;
+  }
+
+  .app-toolbar-head {
+    @apply flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between;
+  }
+
+  .app-toolbar-actions {
+    @apply flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center;
+  }
+
+  .app-filter-grid {
+    @apply grid gap-3 md:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .app-form-grid {
+    @apply grid gap-4 sm:grid-cols-2;
+  }
+
+  .app-form-actions {
+    @apply flex flex-col-reverse gap-2 border-t border-slate-200 px-4 py-4 sm:flex-row sm:justify-end sm:px-6;
+  }
+
+  .app-dialog-content {
+    @apply rounded-none border-0 bg-white shadow-2xl sm:rounded-2xl sm:border sm:border-slate-200;
+  }
+
+  .app-dialog-shell {
+    @apply flex h-[100dvh] flex-col sm:h-auto sm:max-h-[92vh];
+  }
+
+  .app-dialog-header {
+    @apply flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-6 sm:py-5;
+  }
+
+  .app-dialog-body {
+    @apply flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5;
+  }
+
+  .app-dialog-footer {
+    @apply app-form-actions;
+  }
+
+  .app-table-scroll {
+    @apply overflow-x-auto rounded-lg border border-slate-200;
+  }
+}
